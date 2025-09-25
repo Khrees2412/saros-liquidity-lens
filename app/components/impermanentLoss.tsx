@@ -6,7 +6,7 @@ import {
     YAxis,
     Tooltip,
     ResponsiveContainer,
-    ReferenceArea, // Import ReferenceArea for marking ranges
+    ReferenceArea,
 } from "recharts";
 
 // Simple IL curve for classic 50/50 LP (Uniswap V2-style).
@@ -32,12 +32,12 @@ const binIdToPricePercentageChange = (
 
 export default function ImpermanentLossChart({
     changePercent = 50,
-    binIdLower, // New prop for lower bin ID
-    binIdUpper, // New prop for upper bin ID
+    binIdLower, 
+    binIdUpper, 
 }: {
     changePercent?: number;
-    binIdLower?: number; // Optional prop
-    binIdUpper?: number; // Optional prop
+    binIdLower?: number; 
+    binIdUpper?: number; 
 }) {
     // generate price ratios from -90% to +100% by default
     const data = useMemo(() => {
@@ -52,7 +52,7 @@ export default function ImpermanentLossChart({
 
     return (
         <div className="p-4 border rounded bg-white">
-            <h4 className="font-semibold mb-2">Impermanent Loss (50/50 LP)</h4>
+            <h4 className="font-semibold mb-2 text-blue-500">Impermanent Loss (50/50 LP)</h4>
             <div style={{ width: "100%", height: 220 }}>
                 <ResponsiveContainer>
                     <LineChart data={data}>
@@ -82,10 +82,10 @@ export default function ImpermanentLossChart({
                     </LineChart>
                 </ResponsiveContainer>
             </div>
-            <p className="mt-2 text-sm text-slate-500">
-                Shows % impermanent loss vs token price move. 
-                <span className="font-semibold">(Simplified for 50/50 LP; DLMM range is marked conceptually)</span>
+            <p className="mt-2 text-md text-slate-500">
+                Shows % impermanent loss vs token price move.
             </p>
+            <span className="font-medium text-sm text-black mt-5">Simplified for 50/50 LP; DLMM range is marked conceptually</span>
         </div>
     );
 }

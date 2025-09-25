@@ -26,9 +26,7 @@ const positionFetcher = async ([_, publicKey]: [string, PublicKey]): Promise<Use
     if (!publicKey) {
         return [];
     }
-    // Fetch all user positions. You can pass a specific pairAddress if needed.
     const positions = await getUserPositions(publicKey);
-    console.log("Fetched user positions:", positions); // Add this log
     return positions as UserPosition[]; // Cast to your defined interface
 };
 
@@ -111,7 +109,6 @@ export default function PositionDashboard(props: PositionDashboardProps) {
                             {position.pnlUsd && <p className="text-sm text-gray-600">PnL (USD): {position.pnlUsd}</p>}
                             {position.impermanentLossUsd && <p className="text-sm text-gray-600">IL (USD): {position.impermanentLossUsd}</p>}
                             {position.feesEarnedUsd && <p className="text-sm text-gray-600">Fees Earned (USD): {position.feesEarnedUsd}</p>}
-                            {/* Display Impermanent Loss Chart for this position */}
                             <div className="mt-4">
                                 <ImpermanentLossChart 
                                     changePercent={50} // Default value for illustration

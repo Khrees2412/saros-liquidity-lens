@@ -1,4 +1,3 @@
-// components/PositionCreator.tsx
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Button } from "./ui/button";
@@ -48,7 +47,6 @@ export default function PositionCreator({
                 throw new Error("Left bin must be less than right bin");
             }
 
-            console.log("🚀 Starting position creation...");
 
             // Choose creation method
             const createFn = useAlternative
@@ -62,15 +60,11 @@ export default function PositionCreator({
                 relativeBinIdRight,
             });
 
-            console.log("✅ Transaction prepared:", result);
 
             // Send the transaction
             const signature = await sendTransaction(result.tx, signTransaction);
 
-            setSuccess(
-                `Position created successfully! Transaction: ${signature}`
-            );
-            console.log("🎉 Position created successfully:", signature);
+            setSuccess(`Position created successfully! Transaction: ${signature}`);
         } catch (err) {
             const errorMessage =
                 err instanceof Error ? err.message : "Unknown error";
@@ -157,43 +151,15 @@ export default function PositionCreator({
                         </div>
                     </div>
 
-                    {/* Position Preview Section */}
                     {selectedPool && leftBin && rightBin && (
                         <div className="p-3 border rounded bg-blue-50/20 space-y-2">
                             <h4 className="font-semibold text-blue-800">Position Preview</h4>
                             <p className="text-sm text-blue-700">Left Bin: {leftBin}, Right Bin: {rightBin}</p>
                             <p className="text-sm text-blue-700">Estimated Transaction Fee: ~0.000005 SOL</p>
-                            {/* TODO: Add a simple liquidity distribution visualization here */}
                         </div>
                     )}
 
-                    {/* Method selector for debugging */}
-                    {/* This section is commented out for production but kept for reference */}
-                    {/*
-                    <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded">
-                        <Label className="text-sm text-gray-600">
-                            Transaction Method:
-                        </Label>
-                        <label className="flex items-center">
-                            <input
-                                type="radio"
-                                checked={!useAlternative}
-                                onChange={() => setUseAlternative(false)}
-                                className="mr-2"
-                            />
-                            <span className="text-sm">Manual Blockhash</span>
-                        </label>
-                        <label className="flex items-center">
-                            <input
-                                type="radio"
-                                checked={useAlternative}
-                                onChange={() => setUseAlternative(true)}
-                                className="mr-2"
-                            />
-                            <span className="text-sm">SDK Managed</span>
-                        </label>
-                    </div>
-                    */}
+                    
 
                     {error && (
                         <div className="p-3 border border-red-200 rounded bg-red-50">

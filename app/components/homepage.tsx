@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
-import WalletConnect from "./walletConnect"; // Assuming WalletConnect is in the same directory or adjust path
+import WalletConnect from "./walletConnect";
 
 export default function HomePage() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
             <main className="mx-auto max-w-7xl text-center">
-                {/* Hero Section */}
                 <div className="py-12 sm:py-20">
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
                         Liquidity Lens
@@ -20,7 +19,6 @@ export default function HomePage() {
                     </div>
                 </div>
 
-                {/* What is Liquidity Lens Section */}
                 <section className="py-16 sm:py-24 bg-gray-900 rounded-lg shadow-xl mb-12">
                     <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                         What is Liquidity Lens?
@@ -35,7 +33,6 @@ export default function HomePage() {
                     </p>
                 </section>
 
-                {/* How it Works: Core Features Section */}
                 <section className="py-16 sm:py-24">
                     <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                         How it Works: Core Features
@@ -74,7 +71,6 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* Get Started Section */}
                 <section className="py-16 sm:py-24 bg-gray-900 rounded-lg shadow-xl mt-12">
                     <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                         Getting Started
