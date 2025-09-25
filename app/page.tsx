@@ -53,7 +53,7 @@ export default function Home() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <CreatePositionForm pairAddress={selectedPool} />
+                            <CreatePositionForm selectedPool={selectedPool} />
                         </CardContent>
                     </Card>
                 </div>

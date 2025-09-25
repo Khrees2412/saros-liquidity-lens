@@ -1,5 +1,6 @@
+// components/PoolSelector.tsx
 import useSWR from "swr";
-import { fetchPools } from "../lib/saros";
+import { fetchPools, type FetchPoolsResult, type PoolMetadata } from "../lib/saros";
 import {
     Select,
     SelectContent,
@@ -7,48 +8,164 @@ import {
     SelectTrigger,
     SelectValue,
 } from "./ui/select";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { Button } from "./ui/button";
 
-const fetcher = (...args: any[]) => fetchPools();
+// Proper fetcher that handles the SWR contract
+const poolsFetcher = async (): Promise<FetchPoolsResult> => {
+    return await fetchPools(20);
+};
+
+// Helper function to get pool display name
+const getPoolDisplayName = (pool: PoolMetadata): string => {
+    const baseSymbol = pool?.tokenBase?.symbol || 
+                      pool?.tokenBase?.mintAddress?.slice(0, 8) || 
+                      "Unknown";
+    const quoteSymbol = pool?.tokenQuote?.symbol || 
+                       pool?.tokenQuote?.mintAddress?.slice(0, 8) || 
+                       "Unknown";
+    return `${baseSymbol} / ${quoteSymbol}`;
+};
+
+// Helper function to get pool address as string
+const getPoolAddress = (pool: PoolMetadata): string => {
+    if (!pool.pair) return '';
+    return typeof pool.pair === 'string' ? pool.pair : pool.pair.toString();
+};
 
 export default function PoolSelector({
     onSelect,
 }: {
     onSelect: (addr: string) => void;
 }) {
-    const { data: pools, error } = useSWR("/pools", fetcher, {
-        refreshInterval: 0,
+    const { 
+        data: result, 
+        error, 
+        isLoading, 
+        mutate: refetch 
+    } = useSWR<FetchPoolsResult>("/api/pools", poolsFetcher, {
+        refreshInterval: 30000, // Refresh every 30 seconds
+        revalidateOnFocus: false,
+        dedupingInterval: 10000, // Prevent duplicate requests within 10 seconds
     });
 
-    if (error) return <div className="text-red-600">Failed to load pools</div>;
-    if (!pools) return <div>Loading pools...</div>;
+    // Handle different loading and error states
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center p-4 border rounded-md">
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <span>Loading pools...</span>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-between p-4 border border-red-200 rounded-md bg-red-50">
+                <div className="flex items-center text-red-600">
+                    <AlertCircle className="w-4 h-4 mr-2" />
+                    <span>Failed to load pools</span>
+                </div>
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => refetch()}
+                    className="ml-2"
+                >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Retry
+                </Button>
+            </div>
+        );
+    }
+
+    if (result?.error) {
+        return (
+            <div className="flex items-center justify-between p-4 border border-yellow-200 rounded-md bg-yellow-50">
+                <div className="flex items-center text-yellow-700">
+                    <AlertCircle className="w-4 h-4 mr-2" />
+                    <span>Error: {result.error}</span>
+                </div>
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => refetch()}
+                    className="ml-2"
+                >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Retry
+                </Button>
+            </div>
+        );
+    }
+
+    const pools = result?.pools || [];
+
+    if (pools.length === 0) {
+        return (
+            <div className="flex items-center justify-between p-4 border rounded-md bg-gray-50">
+                <span className="text-gray-600">No pools available</span>
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => refetch()}
+                >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Refresh
+                </Button>
+            </div>
+        );
+    }
 
     return (
-        <Select onValueChange={onSelect}>
-            <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a pool" />
-            </SelectTrigger>
-            <SelectContent>
-                {pools.map((p: any) => (
-                    <SelectItem
-                        key={p.pair?.toString() ?? p.pair}
-                        value={p.pair?.toString() ?? p.pair}
-                    >
-                        <div className="flex flex-col">
-                            <div className="font-medium">
-                                {p?.tokenBase?.symbol ??
-                                    p?.tokenBase?.mintAddress ??
-                                    "Unknown"}{" "}
-                                /{" "}
-                                {p?.tokenQuote?.symbol ??
-                                    p?.tokenQuote?.mintAddress}
-                            </div>
-                            <div className="text-xs text-slate-500">
-                                Pair: {p.pair?.toString?.() ?? p.pair}
-                            </div>
-                        </div>
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+        <div className="space-y-2">
+            <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                    Found {pools.length} pools
+                </span>
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => refetch()}
+                    className="text-xs"
+                >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Refresh
+                </Button>
+            </div>
+            
+            <Select onValueChange={onSelect}>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a pool" />
+                </SelectTrigger>
+                <SelectContent>
+                    {pools
+                        .filter(pool => {
+                            const address = getPoolAddress(pool);
+                            return address && address.length > 0; // Only show pools with valid addresses
+                        })
+                        .map((pool, index) => {
+                            const address = getPoolAddress(pool);
+                            const displayName = getPoolDisplayName(pool);
+                            
+                            return (
+                                <SelectItem
+                                    key={address}
+                                    value={address}
+                                >
+                                    <div className="flex flex-col">
+                                        <div className="font-medium">
+                                            {displayName}
+                                        </div>
+                                        <div className="text-xs text-slate-500">
+                                            {address.slice(0, 8)}...{address.slice(-8)}
+                                        </div>
+                                    </div>
+                                </SelectItem>
+                            );
+                        })}
+                </SelectContent>
+            </Select>
+        </div>
     );
 }
