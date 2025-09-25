@@ -10,6 +10,8 @@ import {
 } from "./ui/select";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input"; // Import Input for filtering
+import { useState } from "react"; // Import useState
 
 // Proper fetcher that handles the SWR contract
 const poolsFetcher = async (): Promise<FetchPoolsResult> => {
@@ -19,10 +21,10 @@ const poolsFetcher = async (): Promise<FetchPoolsResult> => {
 // Helper function to get pool display name
 const getPoolDisplayName = (pool: PoolMetadata): string => {
     const baseSymbol = pool?.tokenBase?.symbol || 
-                      pool?.tokenBase?.mintAddress?.slice(0, 8) || 
+                      pool?.tokenBase?.mintAddress?.slice(0, 4) + "..." || 
                       "Unknown";
     const quoteSymbol = pool?.tokenQuote?.symbol || 
-                       pool?.tokenQuote?.mintAddress?.slice(0, 8) || 
+                       pool?.tokenQuote?.mintAddress?.slice(0, 4) + "..." || 
                        "Unknown";
     return `${baseSymbol} / ${quoteSymbol}`;
 };
@@ -38,6 +40,8 @@ export default function PoolSelector({
 }: {
     onSelect: (addr: string) => void;
 }) {
+    const [searchTerm, setSearchTerm] = useState<string>(""); // State for search term
+    const [sortBy, setSortBy] = useState<"none" | "liquidity" | "price">("none"); // State for sorting
     const { 
         data: result, 
         error, 
@@ -101,6 +105,35 @@ export default function PoolSelector({
 
     const pools = result?.pools || [];
 
+    const filteredAndSortedPools = pools
+        .filter(pool => {
+            const address = getPoolAddress(pool);
+            const displayName = getPoolDisplayName(pool);
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            return (
+                address &&
+                address.length > 0 &&
+                (displayName.toLowerCase().includes(lowerCaseSearchTerm) ||
+                 address.toLowerCase().includes(lowerCaseSearchTerm) ||
+                 pool.tokenBase?.symbol?.toLowerCase().includes(lowerCaseSearchTerm) ||
+                 pool.tokenQuote?.symbol?.toLowerCase().includes(lowerCaseSearchTerm))
+            );
+        })
+        .sort((a, b) => {
+            if (sortBy === "liquidity") {
+                // For mock data, assuming simple string comparison or numeric conversion
+                const liquidityA = parseFloat(a.totalLiquidityUsd?.replace(/,/g, '') || "0");
+                const liquidityB = parseFloat(b.totalLiquidityUsd?.replace(/,/g, '') || "0");
+                return liquidityB - liquidityA; // Sort descending
+            } else if (sortBy === "price") {
+                // For mock data, assuming simple string comparison or numeric conversion
+                const priceA = parseFloat(a.currentPrice || "0");
+                const priceB = parseFloat(b.currentPrice || "0");
+                return priceB - priceA; // Sort descending
+            }
+            return 0;
+        });
+
     if (pools.length === 0) {
         return (
             <div className="flex items-center justify-between p-4 border rounded-md bg-gray-50">
@@ -118,10 +151,32 @@ export default function PoolSelector({
     }
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0 sm:space-x-4 mb-4">
+                <Input
+                    placeholder="Search pools..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full sm:w-1/2"
+                />
+                <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">Sort by:</span>
+                    <Select onValueChange={(value: "none" | "liquidity" | "price") => setSortBy(value)} value={sortBy}>
+                        <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Sort By" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="liquidity">Liquidity</SelectItem>
+                            <SelectItem value="price">Price</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
             <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">
-                    Found {pools.length} pools
+                    Found {filteredAndSortedPools.length} pools
                 </span>
                 <Button 
                     variant="ghost" 
@@ -139,7 +194,7 @@ export default function PoolSelector({
                     <SelectValue placeholder="Select a pool" />
                 </SelectTrigger>
                 <SelectContent>
-                    {pools
+                    {filteredAndSortedPools
                         .filter(pool => {
                             const address = getPoolAddress(pool);
                             return address && address.length > 0; // Only show pools with valid addresses
@@ -157,6 +212,12 @@ export default function PoolSelector({
                                         <div className="font-medium">
                                             {displayName}
                                         </div>
+                                        {pool.currentPrice && (
+                                            <div className="text-xs text-slate-500">Price: {pool.currentPrice}</div>
+                                        )}
+                                        {pool.totalLiquidityUsd && (
+                                            <div className="text-xs text-slate-500">Liquidity: ${pool.totalLiquidityUsd}</div>
+                                        )}
                                         <div className="text-xs text-slate-500">
                                             {address.slice(0, 8)}...{address.slice(-8)}
                                         </div>

@@ -106,7 +106,7 @@ export default function PositionCreator({
     return (
         <div className="space-y-4">
             <div className="p-4 border rounded-lg bg-white">
-                <h3 className="font-semibold text-lg mb-4">
+                <h3 className="font-semibold text-lg mb-4 text-blue-500">
                     Create a Position
                 </h3>
 
@@ -157,7 +157,19 @@ export default function PositionCreator({
                         </div>
                     </div>
 
+                    {/* Position Preview Section */}
+                    {selectedPool && leftBin && rightBin && (
+                        <div className="p-3 border rounded bg-blue-50/20 space-y-2">
+                            <h4 className="font-semibold text-blue-800">Position Preview</h4>
+                            <p className="text-sm text-blue-700">Left Bin: {leftBin}, Right Bin: {rightBin}</p>
+                            <p className="text-sm text-blue-700">Estimated Transaction Fee: ~0.000005 SOL</p>
+                            {/* TODO: Add a simple liquidity distribution visualization here */}
+                        </div>
+                    )}
+
                     {/* Method selector for debugging */}
+                    {/* This section is commented out for production but kept for reference */}
+                    {/*
                     <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded">
                         <Label className="text-sm text-gray-600">
                             Transaction Method:
@@ -181,6 +193,7 @@ export default function PositionCreator({
                             <span className="text-sm">SDK Managed</span>
                         </label>
                     </div>
+                    */}
 
                     {error && (
                         <div className="p-3 border border-red-200 rounded bg-red-50">
@@ -207,7 +220,7 @@ export default function PositionCreator({
                     <Button
                         onClick={handleCreatePosition}
                         disabled={isCreating}
-                        className="w-full"
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white"
                     >
                         {isCreating ? (
                             <>

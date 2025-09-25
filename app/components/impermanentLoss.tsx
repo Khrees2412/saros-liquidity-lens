@@ -6,6 +6,7 @@ import {
     YAxis,
     Tooltip,
     ResponsiveContainer,
+    ReferenceArea, // Import ReferenceArea for marking ranges
 } from "recharts";
 
 // Simple IL curve for classic 50/50 LP (Uniswap V2-style).
@@ -17,10 +18,26 @@ function impermanentLossRatio(r: number) {
     return 1 - (2 * sqrtR) / denom;
 }
 
+// Helper to convert bin ID to a conceptual price percentage change for visualization.
+// This is a simplified representation and would ideally use actual pool price data.
+const binIdToPricePercentageChange = (
+    binId: number,
+    currentPriceBin: number = 0 // Assuming current price is at bin 0 for simplicity
+): number => {
+    // A very simplistic mapping: each bin represents a 1% price change.
+    // In a real DLMM, this would depend on bin step and token decimals.
+    const priceDifferenceInBins = binId - currentPriceBin;
+    return priceDifferenceInBins * 1; // 1% per bin
+};
+
 export default function ImpermanentLossChart({
     changePercent = 50,
+    binIdLower, // New prop for lower bin ID
+    binIdUpper, // New prop for upper bin ID
 }: {
     changePercent?: number;
+    binIdLower?: number; // Optional prop
+    binIdUpper?: number; // Optional prop
 }) {
     // generate price ratios from -90% to +100% by default
     const data = useMemo(() => {
@@ -52,11 +69,22 @@ export default function ImpermanentLossChart({
                             stroke="#1d4ed8"
                             dot={false}
                         />
+                        {binIdLower !== undefined && binIdUpper !== undefined && (
+                            <ReferenceArea 
+                                x1={binIdToPricePercentageChange(binIdLower)} 
+                                x2={binIdToPricePercentageChange(binIdUpper)} 
+                                stroke="#8884d8" 
+                                strokeOpacity={0.3} 
+                                fill="#8884d8" 
+                                fillOpacity={0.1}
+                            />
+                        )}
                     </LineChart>
                 </ResponsiveContainer>
             </div>
             <p className="mt-2 text-sm text-slate-500">
-                Shows % impermanent loss vs token price move.
+                Shows % impermanent loss vs token price move. 
+                <span className="font-semibold">(Simplified for 50/50 LP; DLMM range is marked conceptually)</span>
             </p>
         </div>
     );

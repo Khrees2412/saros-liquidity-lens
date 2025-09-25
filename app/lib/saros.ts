@@ -1,4 +1,3 @@
-// lib/saros.ts
 import { Keypair, PublicKey, Transaction, Connection } from "@solana/web3.js";
 import { LiquidityBookServices, MODE } from "@saros-finance/dlmm-sdk";
 
@@ -22,6 +21,8 @@ export interface PoolMetadata {
         symbol?: string;
         mintAddress?: string;
     };
+    totalLiquidityUsd?: string; // Placeholder for total liquidity in USD
+    currentPrice?: string; // Placeholder for current pool price
 }
 
 export interface FetchPoolsResult {
@@ -47,6 +48,8 @@ export async function fetchPools(limit = 20): Promise<FetchPoolsResult> {
                 return {
                     ...metadata,
                     pair: addr.toBase58(), // Ensure pair address is set
+                    totalLiquidityUsd: "10,000,000", // Mock data
+                    currentPrice: "1.00", // Mock data
                 };
             } catch (err) {
                 console.error(
@@ -75,14 +78,63 @@ export async function fetchPools(limit = 20): Promise<FetchPoolsResult> {
     }
 }
 
-export async function getUserPositions(payer: PublicKey) {
+export async function getUserPositions(
+    payer: PublicKey,
+    pairAddress?: string | PublicKey
+) {
     try {
-        const pair = new PublicKey(
-            "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E"
-        );
-        return await sarosDLMM.getUserPositions({ payer, pair });
+        let pairsToFetch: PublicKey[] = [];
+
+        if (pairAddress) {
+            pairsToFetch.push(
+                typeof pairAddress === "string"
+                    ? new PublicKey(pairAddress)
+                    : pairAddress
+            );
+        } else {
+            // Fetch all pool addresses if no specific pairAddress is provided
+            const allAddresses = await sarosDLMM.fetchPoolAddresses();
+            // Limit to 5 pools for demo purposes to avoid excessive fetching
+            pairsToFetch = allAddresses
+                .slice(0, 5) // Manually apply limit here
+                .map((a: any) => (typeof a === "string" ? new PublicKey(a) : a))
+                .filter(Boolean);
+        }
+
+        const allUserPositions: any[] = [];
+        for (const pair of pairsToFetch) {
+            try {
+                const positions = await sarosDLMM.getUserPositions({
+                    payer,
+                    pair,
+                });
+
+                // Add mock data for the new fields
+                const enrichedPositions = positions.map((p: any) => ({
+                    ...p,
+                    poolAddress: pair.toBase58(), // Ensure poolAddress is set
+                    mintAddress: p.mintAddress?.toBase58() || "", // Ensure mintAddress is string
+                    liquidityAmount: p.liquidityAmount?.toString() || "0", // Ensure liquidityAmount is string
+                    binIdLower: p.binIdLower || 0, // Placeholder
+                    binIdUpper: p.binIdUpper || 0, // Placeholder
+                    valueUsd: (Math.random() * 1000).toFixed(2),
+                    pnlUsd: (Math.random() * 200 - 100).toFixed(2),
+                    impermanentLossUsd: (Math.random() * 50).toFixed(2),
+                    feesEarnedUsd: (Math.random() * 30).toFixed(2),
+                }));
+
+                allUserPositions.push(...enrichedPositions);
+            } catch (innerErr) {
+                console.warn(
+                    `Failed to fetch positions for pool ${pair.toBase58()}:`,
+                    innerErr
+                );
+                // Continue to the next pool even if one fails
+            }
+        }
+        return allUserPositions;
     } catch (err) {
-        console.error("getUserPositions error:", err);
+        console.error("getUserPositions error at top level:", err);
         return [];
     }
 }

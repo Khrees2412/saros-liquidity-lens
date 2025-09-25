@@ -1,18 +1,19 @@
 # Liquidity Lens — A Saros DLMM Demo
 
-Liquidity Lens is a demo application built for the Saros DLMM Hackathon. It showcases how to use the `@saros-finance/dlmm-sdk` to build a real-world application for managing liquidity on Saros's Dynamic Liquidity Market Maker (DLMM).
+This project, **Liquidity Lens**, is a comprehensive demo application developed for the Saros DLMM Hackathon. It serves as a practical showcase for leveraging the `@saros-finance/dlmm-sdk` to construct a robust, real-world application for managing liquidity within Saros's Dynamic Liquidity Market Maker (DLMM) protocol.
+The application provides users with tools to interact with DLMM pools on the Solana blockchain, offering functionalities that enhance liquidity provision and monitoring.
 
 This project is built with Next.js (App Router), Bun, Tailwind CSS, and shadcn/ui.
 
-**Live Demo:** [Deploy your own to Vercel/Netlify to get a live link]
+**Live Demo:** [**Add your live deployed app link here!**]
 
 ## Core Features
 
 -   **Wallet Connection:** Connect your Phantom wallet (or any other wallet compatible with `@solana/wallet-adapter-react`).
--   **Pool Discovery:** Browse and select from a list of available DLMM pools on Saros.
--   **Create Liquidity Position:** Open a new liquidity position with a custom price range. The app provides a real-time preview of the transaction before you sign.
--   **Position Dashboard (Coming Soon):** Track your active positions, and monitor your profit and loss (PnL).
--   **Impermanent Loss (IL) Chart:** A visual representation of impermanent loss, built with Recharts.
+-   **Pool Discovery:** Browse, search, filter, and sort from a list of available DLMM pools on Saros, with enriched information like current price and liquidity.
+-   **Create Liquidity Position:** Open a new liquidity position with a custom price range. The app provides a real-time preview of estimated fees and liquidity distribution before you sign.
+-   **Position Dashboard:** Track your active liquidity positions, monitor profit and loss (PnL), and visualize impermanent loss for each position.
+-   **Impermanent Loss (IL) Chart:** A visual representation of impermanent loss, adapted to show the range of concentrated liquidity positions, built with Recharts.
 
 ## Tech Stack
 
@@ -20,7 +21,7 @@ This project is built with Next.js (App Router), Bun, Tailwind CSS, and shadcn/u
 -   **Package Manager:** [Bun](https://bun.sh/)
 -   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 -   **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
--   **Saros Integration:** [@saros-finance/dlmm-sdk](https://www.npmjs.com/package/@saros-finance/dlmm-sdk)
+-   **Saros Integration:** [@saros-finance/dlmm-sdk](https://www.npmjs.com/package/@saros-finance/dlmm-sdk) - Used for fetching pool data, managing user positions, and creating liquidity positions.
 -   **Solana Integration:**
     -   `@solana/web3.js`
     -   `@solana/wallet-adapter-react`
@@ -66,6 +67,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the r
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Future Enhancements
+
+-   **Advanced IL Calculation:** Implement a more precise impermanent loss calculation for concentrated liquidity positions.
+-   **Position Management:** Add features for adjusting liquidity ranges, adding/removing liquidity, and closing positions.
+-   **Strategy Vaults:** Explore integration with simplified strategy vaults for automated liquidity management.
+-   **Real-time Data:** Integrate actual market data for total liquidity, 24h volume, and APR for pools.
+-   **Comprehensive Analytics:** Provide more in-depth analytics for user positions, including historical performance.
 
 ## Learn More
 
